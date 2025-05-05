@@ -1,0 +1,2 @@
+Please read this guide if you are upgrading from a version earlier than 2.7.0:
+https://codecanyon.net/item/stake-online-casino-gaming-platform-single-page-application/25370124/faqs/56575

@@ -1,0 +1,15 @@
+{
+    "id": "installer",
+    "name": "Installer",
+    "type": "",
+    "description": "This add-on facilitates the installation of the application through a user-friendly web interface.",
+    "providers": [
+        "Packages\\Installer\\Providers\\PackageServiceProvider"
+    ],
+    "base_path": "installer",
+    "source_path": "src",
+    "namespace": "Packages\\Installer\\",
+    "static": {},
+    "purchase_url": null,
+    "min_app_version": "2.10.2"
+}

@@ -1,0 +1,1 @@
+<?php use Illuminate\Foundation\Application; return Application::configure()->withRouting()->withMiddleware()->withExceptions()->create();
