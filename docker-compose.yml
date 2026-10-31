@@ -1,0 +1,94 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-v4}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data:/data
+
+  scylla:
+    image: scylladb/scylla:6.2
+    command: ["--smp", "1", "--memory", "750M", "--overprovisioned", "1"]
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh $$(hostname -i) 9042 -e 'SELECT release_version FROM system.local' >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BACKEND_INTERNAL_HOST: backend
+        NEXT_PUBLIC_LANGUAGES: ${NEXT_PUBLIC_LANGUAGES:-en}
+        NEXT_PUBLIC_DEFAULT_LANGUAGE: ${NEXT_PUBLIC_DEFAULT_LANGUAGE:-en}
+    command: ["node", "dist/index.js", "--env", "production"]
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-v4}
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SCYLLA_CONNECT_POINTS: scylla:9042
+      SCYLLA_DATACENTER: datacenter1
+    ports:
+      - "${NEXT_PUBLIC_BACKEND_PORT:-4000}:4000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      scylla:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BACKEND_INTERNAL_HOST: backend
+        NEXT_PUBLIC_LANGUAGES: ${NEXT_PUBLIC_LANGUAGES:-en}
+        NEXT_PUBLIC_DEFAULT_LANGUAGE: ${NEXT_PUBLIC_DEFAULT_LANGUAGE:-en}
+    command: ["pnpm", "start:frontend"]
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_BACKEND_PORT: 4000
+      NEXT_PUBLIC_FRONTEND_PORT: 3000
+      BACKEND_INTERNAL_HOST: backend
+      BACKEND_INTERNAL_URL: http://backend:4000/api
+    ports:
+      - "${NEXT_PUBLIC_FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  redis_data:
+  scylla_data:

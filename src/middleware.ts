@@ -11,6 +11,8 @@ const frontendPort = process.env.NEXT_PUBLIC_FRONTEND_PORT || 3000;
 const siteUrl = dev
   ? `http://localhost:${frontendPort}`
   : process.env.NEXT_PUBLIC_SITE_URL;
+const internalApiUrl =
+  process.env.BACKEND_INTERNAL_URL || `${siteUrl}/api`;
 const isFrontendEnabled = process.env.NEXT_PUBLIC_FRONTEND === "true";
 const defaultUserPath = process.env.NEXT_PUBLIC_DEFAULT_USER_PATH || "/user";
 const isMaintenance =
@@ -37,7 +39,7 @@ let rolesCache: RolesCache | null = null;
 
 async function fetchRolesAndPermissions(request: NextRequest) {
   try {
-    const apiUrl = `${siteUrl}/api/auth/role`;
+    const apiUrl = `${internalApiUrl}/auth/role`;
 
     const headers: Record<string, string> = {
       Accept: "application/json",
@@ -126,7 +128,7 @@ async function verifyToken(
 
 async function refreshToken(request: NextRequest) {
   try {
-    const response = await fetch(`${siteUrl}/api/auth/session`, {
+    const response = await fetch(`${internalApiUrl}/auth/session`, {
       method: "GET",
       credentials: "include",
       headers: {

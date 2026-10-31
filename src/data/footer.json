@@ -1,0 +1,17 @@
+{
+  "footerNote": "Stay informed,",
+  "footerNoteLink": "/blog",
+  "footerNoteText": "explore our blog",
+  "sections": [
+    {
+      "title": "Company",
+      "links": [
+        {
+          "name": "Home",
+          "url": "/"
+        }
+      ]
+    }
+  ],
+  "copyright": "© 2026 Bicrypto. All rights reserved."
+}

@@ -13,6 +13,7 @@ dotenv.config();
  */
 const output = process.env.NEXT_OUTPUT;
 const backendPort = process.env.NEXT_PUBLIC_BACKEND_PORT || 4000;
+const backendHost = process.env.BACKEND_INTERNAL_HOST || "localhost";
 
 /**
  * Next.js configuration
@@ -35,15 +36,15 @@ const nextConfig = async (phase, { defaultConfig }) => {
       return [
         {
           source: "/api/:path*",
-          destination: `http://localhost:${backendPort}/api/:path*`, // Proxy to Backend
+          destination: `http://${backendHost}:${backendPort}/api/:path*`, // Proxy to Backend
         },
         {
           source: "/uploads/:path*",
-          destination: `http://localhost:${backendPort}/uploads/:path*`, // Proxy to Backend
+          destination: `http://${backendHost}:${backendPort}/uploads/:path*`, // Proxy to Backend
         },
         {
           source: "/themes/:path*",
-          destination: `http://localhost:${backendPort}/themes/:path*`, // Proxy to Backend
+          destination: `http://${backendHost}:${backendPort}/themes/:path*`, // Proxy to Backend
         },
       ];
     },
