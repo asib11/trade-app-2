@@ -83,6 +83,8 @@ export class MashServer extends RouteHandler {
       // Ensure models are initialized
       await this.ensureDatabaseReady();
 
+      await this.safeExecute(() => initialize(), "initializeScylla");
+
       console.log(`\x1b[36m${threadType}: Setting up roles...\x1b[0m`);
       await this.safeExecute(() => this.setupRoles(), "setupRoles");
 
@@ -161,7 +163,6 @@ export class MashServer extends RouteHandler {
 
   private async setupEcosystem() {
     try {
-      await initialize();
       await MatchingEngine.getInstance();
     } catch (error) {
       logger(

@@ -119,15 +119,6 @@ const ExchangeProviderPage = () => {
             </div>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
-            {!exchange?.licenseStatus && (
-              <Link
-                href={`/admin/finance/exchange/provider/${exchange?.productId}/license`}
-              >
-                <Button color="primary" className="ml-2" shape={"rounded-sm"}>
-                  {t("Activate License")}
-                </Button>
-              </Link>
-            )}
             <BackButton href="/admin/finance/exchange" />
           </div>
         </div>

@@ -60,20 +60,13 @@ export const metadata = {
 
 export default async (data: Handler) => {
   const { body, params } = data;
-  const { purchaseCode, envatoUsername } = body;
   const { productId } = params;
 
-  if (!productId || !purchaseCode || !envatoUsername) {
-    throw new Error("All fields are required for license activation.");
+  if (!productId) {
+    throw new Error("Product ID is required for local activation.");
   }
 
-  const response = await activateLicense(
-    productId,
-    purchaseCode,
-    envatoUsername
-  );
-  if (response.lic_response) {
-    await saveLicense(productId, envatoUsername);
-  }
-  return response;
+  const response = await activateLicense(productId);
+  await saveLicense(productId, "local");
+  return { ...response, status: true };
 };

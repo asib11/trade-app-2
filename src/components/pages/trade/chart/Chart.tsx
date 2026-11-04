@@ -16,6 +16,7 @@ import {
   resolutionMap,
   resolutionMap_provider,
   supported_resolutions_provider,
+  precisionToDecimals,
 } from "@/utils/chart";
 import { useMediaQuery } from "react-responsive";
 import { breakpoints } from "@/utils/breakpoints";
@@ -102,7 +103,9 @@ const ChartBase = ({}: ChartProps) => {
       ? `/api/ext/ecosystem/chart`
       : `/api/exchange/chart`;
 
-    const pricescale = Math.pow(10, market.precision?.price || 8);
+    const priceDecimals = precisionToDecimals(market.precision?.price);
+    const amountDecimals = precisionToDecimals(market.precision?.amount);
+    const pricescale = Math.pow(10, priceDecimals);
     return {
       async onReady(callback) {
         setTimeout(() => {
@@ -135,7 +138,7 @@ const ChartBase = ({}: ChartProps) => {
             exchange: process.env.NEXT_PUBLIC_SITE_NAME,
             listed_exchange: process.env.NEXT_PUBLIC_SITE_NAME,
             timezone: "Etc/UTC",
-            volume_precision: market?.precision?.amount || 8,
+            volume_precision: amountDecimals,
             supported_resolutions: isEco
               ? intervals
               : supported_resolutions_provider[provider || "binance"],

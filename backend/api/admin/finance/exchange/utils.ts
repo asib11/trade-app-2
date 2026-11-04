@@ -140,7 +140,7 @@ export async function saveLicense(productId: string, username: string) {
         {
           licenseStatus: true,
           status: true,
-          username: username,
+          username,
         },
         {
           where: { productId: productId },

@@ -100,6 +100,29 @@ export class BinaryOrderService {
 
     await ensureNotBanned();
 
+    const exchange = await ensureExchange();
+    let ticker;
+    try {
+      ticker = await exchange.fetchTicker(`${currency}/${pair}`);
+    } catch (err: any) {
+      console.error(
+        `Error fetching market data for ${currency}/${pair}:`,
+        err
+      );
+      throw createError({
+        statusCode: 500,
+        message: "Error fetching market data from exchange",
+      });
+    }
+
+    const price = ticker?.last;
+    if (!price) {
+      throw createError({
+        statusCode: 500,
+        message: "Error fetching ticker data (price unavailable)",
+      });
+    }
+
     return await sequelize.transaction(async (t) => {
       let wallet;
       if (!isDemo) {
@@ -129,31 +152,6 @@ export class BinaryOrderService {
           { balance: newBalance },
           { where: { id: wallet.id }, transaction: t }
         );
-      }
-
-      const exchange = await ensureExchange();
-      await ensureNotBanned();
-
-      let ticker;
-      try {
-        ticker = await exchange.fetchTicker(`${currency}/${pair}`);
-      } catch (err: any) {
-        console.error(
-          `Error fetching market data for ${currency}/${pair}:`,
-          err
-        );
-        throw createError({
-          statusCode: 500,
-          message: "Error fetching market data from exchange",
-        });
-      }
-
-      const price = ticker?.last;
-      if (!price) {
-        throw createError({
-          statusCode: 500,
-          message: "Error fetching ticker data (price unavailable)",
-        });
       }
 
       const finalOrder = await models.binaryOrder.create(

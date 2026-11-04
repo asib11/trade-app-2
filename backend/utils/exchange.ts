@@ -78,6 +78,13 @@ class ExchangeManager {
         apiKey,
         secret: apiSecret,
         password: apiPassphrase,
+        options:
+          provider === "binance" || provider === "binanceus"
+            ? {
+                defaultType: "spot",
+                fetchMarkets: { types: ["spot"] },
+              }
+            : undefined,
       });
 
       const credentialsValid = await exchange.checkRequiredCredentials();

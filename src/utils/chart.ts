@@ -14,6 +14,15 @@ export const intervals = [
   "1w",
 ];
 
+export function precisionToDecimals(precision: number | undefined): number {
+  if (!Number.isFinite(precision) || precision === undefined) return 8;
+  if (precision >= 1) return Math.trunc(precision);
+
+  const value = precision.toString();
+  const decimalIndex = value.indexOf(".");
+  return decimalIndex === -1 ? 0 : value.length - decimalIndex - 1;
+}
+
 export const supported_resolutions_provider = {
   native: [
     "1",

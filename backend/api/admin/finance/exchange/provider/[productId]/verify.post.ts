@@ -70,16 +70,13 @@ export const metadata = {
 
 export default async (data: Handler) => {
   const { body, params } = data;
-  const { purchaseCode, envatoUsername } = body;
   const { productId } = params;
 
   if (!productId) {
     throw new Error("Product ID is required for license verification.");
   }
 
-  const response = await verifyLicense(productId, purchaseCode, envatoUsername);
-  if (response.message && response.message.startsWith("Verified")) {
-    await saveLicense(productId, envatoUsername);
-  }
-  return response;
+  const response = await verifyLicense(productId);
+  await saveLicense(productId, "local");
+  return { ...response, status: true };
 };

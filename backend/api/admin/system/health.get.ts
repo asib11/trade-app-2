@@ -8,6 +8,10 @@ import twilio from "twilio";
 
 const cachedResults: { [key: string]: any } = {};
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export const metadata: OperationObject = {
   summary: "Gets system details",
   operationId: "getSystemDetails",
@@ -120,7 +124,7 @@ async function checkEmailService() {
     return {
       service: "Email",
       status: "Down",
-      message: error,
+      message: getErrorMessage(error),
       timestamp: formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"),
     };
   }
@@ -302,25 +306,14 @@ async function checkGoogleTranslateService() {
 async function checkScyllaService() {
   const scyllaUsername = process.env.SCYLLA_USERNAME;
   const scyllaPassword = process.env.SCYLLA_PASSWORD;
-
-  if (
-    !scyllaUsername ||
-    !scyllaPassword ||
-    scyllaUsername === "" ||
-    scyllaPassword === ""
-  ) {
-    return {
-      service: "Scylla",
-      status: "Down",
-      message: "Scylla credentials not found or incomplete",
-      timestamp: formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"),
-    };
-  }
-
   const client = new Client({
-    contactPoints: ["localhost"], // Replace with your Scylla DB contact points
-    localDataCenter: "datacenter1", // Replace with your data center name
-    credentials: { username: scyllaUsername, password: scyllaPassword },
+    contactPoints: (
+      process.env.SCYLLA_CONNECT_POINTS || "localhost:9042"
+    ).split(","),
+    localDataCenter: process.env.SCYLLA_DATACENTER || "datacenter1",
+    ...(scyllaUsername && scyllaPassword
+      ? { credentials: { username: scyllaUsername, password: scyllaPassword } }
+      : {}),
   });
 
   try {
@@ -339,7 +332,7 @@ async function checkScyllaService() {
     return {
       service: "Scylla",
       status: "Down",
-      message: error.message,
+      message: getErrorMessage(error),
       timestamp: formatDate(new Date(), "yyyy-MM-dd HH:mm:ss"),
     };
   } finally {
